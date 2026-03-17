@@ -1,0 +1,90 @@
+name: Deploy GCP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy_web_service:
+        description: Deploy Cloud Run service
+        required: true
+        type: boolean
+        default: true
+      deploy_fetch_gsc_job:
+        description: Deploy fetch_gsc Cloud Run job
+        required: true
+        type: boolean
+        default: true
+      deploy_fetch_gsc_scheduler:
+        description: Deploy fetch_gsc Cloud Scheduler job
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-gcp-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GOOGLE_CLOUD_PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      CLOUD_RUN_REGION: ${{ vars.GCP_REGION }}
+      ARTIFACT_REGISTRY_REPOSITORY: ${{ vars.ARTIFACT_REGISTRY_REPOSITORY }}
+      CLOUD_RUN_SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE_NAME }}
+      CLOUD_RUN_SERVICE_ACCOUNT: ${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}
+      BIGQUERY_DATASET: ${{ vars.BIGQUERY_DATASET }}
+      BIGQUERY_LOCATION: ${{ vars.BIGQUERY_LOCATION }}
+      GSC_PROPERTY_URI: ${{ vars.GSC_PROPERTY_URI }}
+      TARGET_SITE_HOST: ${{ vars.TARGET_SITE_HOST }}
+      MANUAL_RUN_CLOUD_RUN_REGION: ${{ vars.GCP_REGION }}
+      MANUAL_RUN_FETCH_GSC_JOB_NAME: ${{ vars.FETCH_GSC_JOB_NAME }}
+      WEB_ALLOW_UNAUTHENTICATED: ${{ vars.WEB_ALLOW_UNAUTHENTICATED }}
+      WEB_SECRET_MAPPINGS: ${{ vars.WEB_SECRET_MAPPINGS }}
+      WEB_CPU: ${{ vars.WEB_CPU }}
+      WEB_MEMORY: ${{ vars.WEB_MEMORY }}
+      WEB_TIMEOUT: ${{ vars.WEB_TIMEOUT }}
+      WEB_CONCURRENCY: ${{ vars.WEB_CONCURRENCY }}
+      WEB_MIN_INSTANCES: ${{ vars.WEB_MIN_INSTANCES }}
+      WEB_MAX_INSTANCES: ${{ vars.WEB_MAX_INSTANCES }}
+      CLOUD_RUN_JOB_NAME: ${{ vars.FETCH_GSC_JOB_NAME }}
+      CLOUD_RUN_JOB_SERVICE_ACCOUNT: ${{ vars.FETCH_GSC_JOB_SERVICE_ACCOUNT }}
+      FETCH_GSC_SECRET_MAPPINGS: ${{ vars.FETCH_GSC_SECRET_MAPPINGS }}
+      FETCH_GSC_IMAGE_TAG: ${{ vars.FETCH_GSC_IMAGE_TAG }}
+      FETCH_GSC_DEFAULT_ARGS: ${{ vars.FETCH_GSC_DEFAULT_ARGS }}
+      CLOUD_SCHEDULER_LOCATION: ${{ vars.CLOUD_SCHEDULER_LOCATION }}
+      CLOUD_SCHEDULER_JOB_NAME: ${{ vars.CLOUD_SCHEDULER_JOB_NAME }}
+      CLOUD_SCHEDULER_SERVICE_ACCOUNT: ${{ vars.CLOUD_SCHEDULER_SERVICE_ACCOUNT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Set gcloud project
+        run: gcloud config set project "${GOOGLE_CLOUD_PROJECT}"
+
+      - name: Deploy Cloud Run service
+        if: github.event_name != 'workflow_dispatch' || inputs.deploy_web_service
+        run: bash scripts/deploy-web-service.sh
+
+      - name: Deploy fetch_gsc Cloud Run job
+        if: github.event_name != 'workflow_dispatch' || inputs.deploy_fetch_gsc_job
+        run: bash scripts/deploy-fetch-gsc-job.sh
+
+      - name: Deploy fetch_gsc Cloud Scheduler job
+        if: (github.event_name != 'workflow_dispatch' || inputs.deploy_fetch_gsc_scheduler) && env.CLOUD_SCHEDULER_LOCATION != '' && env.CLOUD_SCHEDULER_JOB_NAME != '' && env.CLOUD_SCHEDULER_SERVICE_ACCOUNT != ''
+        run: bash scripts/deploy-fetch-gsc-scheduler.sh

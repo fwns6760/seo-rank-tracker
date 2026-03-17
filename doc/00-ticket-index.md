@@ -1,0 +1,71 @@
+# チケット一覧
+
+## 重要事項
+- 【】 作業を始める前に必ず対象チケットを確認し、今回の作業箇所をチェックしてから着手する
+- 【】 チケットは原則として `01` から番号順に進める。順番を変更する場合は理由を各チケットの `作業ログ` に残す
+- 【】 各チケットで行った作業、判断、保留事項はそのチケットの `作業ログ` に追記する
+
+- 【×】 [01. プロジェクト基盤セットアップ](./01-project-bootstrap.md)
+- 【×】 [02. BigQuery テーブル設計と SQL 整備](./02-bigquery-schema-and-sql.md)
+- 【×】 [03. BigQuery 接続レイヤーとクエリ基盤](./03-bigquery-data-access-layer.md)
+- 【×】 [04. 構造化ログと execution_id 基盤](./04-structured-logging-and-execution-id.md)
+- 【×】 [05. GSC 取得 Job 実装](./05-gsc-fetch-job.md)
+- 【×】 [06. daily_rankings への upsert と再取得制御](./06-daily-rankings-upsert-and-backfill.md)
+- 【×】 [07. 手動実行 API と起動 UI](./07-manual-run-api-and-ui.md)
+- 【×】 [08. dashboard 画面](./08-dashboard-screen.md)
+- 【×】 [09. keywords 画面](./09-keywords-screen.md)
+- 【×】 [10. pages 画面](./10-pages-screen.md)
+- 【×】 [11. Cloud Run Jobs と Docker 化](./11-cloud-run-jobs-and-docker.md)
+- 【×】 [12. Cloud Scheduler と運用設定](./12-cloud-scheduler-and-operations.md)
+- 【×】 [13. rewrites 機能](./13-rewrites-feature.md)
+- 【×】 [14. internal_links 機能](./14-internal-links-feature.md)
+- 【×】 [15. settings と tracked_keywords 管理](./15-settings-and-tracked-keywords.md)
+- 【×】 [16. アラートと通知基盤](./16-alerts-and-notifications.md)
+- 【×】 [17. README と運用ドキュメント整備](./17-readme-and-deployment-docs.md)
+- 【×】 [18. WordPress 記事マスタ同期基盤](./18-wordpress-post-sync-foundation.md)
+- 【×】 [19. sync_wordpress_posts Job](./19-sync-wordpress-posts-job.md)
+- 【×】 [20. settings に WordPress 接続設定追加](./20-wordpress-connection-settings.md)
+- 【×】 [21. rewrites と WordPress 記事の紐付け](./21-rewrites-wordpress-linking.md)
+- 【×】 [22. internal_link_events 追加](./22-internal-link-events.md)
+- 【×】 [23. 施策成果判定ロジック追加](./23-impact-evaluation-logic.md)
+- 【×】 [24. tracked_keywords の pillar / cluster 拡張](./24-tracked-keywords-pillar-cluster-extension.md)
+- 【×】 [25. clusters 画面](./25-clusters-screen.md)
+- 【×】 [26. 既存画面の cluster 連携](./26-cluster-integration-on-existing-screens.md)
+- 【×】 [27. WordPress / cluster 運用ドキュメント整備](./27-wordpress-and-clusters-docs.md)
+- 【×】 [28. GCP デプロイと GitHub Actions](./28-gcp-deployment-and-github-actions.md)
+
+## 作業ログ
+- 2026-03-16: チケット一覧を作成。
+- 2026-03-16: 着手前確認、番号順の遵守、作業ログ追記の運用ルールを追加。
+- 2026-03-16: `00` を確認し、実装作業を `01` から番号順で開始することを確認。
+- 2026-03-16: `01` の基盤セットアップ完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `02` の BigQuery スキーマと SQL 整備完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `03` の BigQuery 接続レイヤーとクエリ基盤完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `04` の構造化ログと execution_id 基盤完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `05` の GSC 取得 Job 実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `06` の `daily_rankings` upsert と再取得制御実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `07` の手動実行 API と起動 UI 完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `08` の dashboard 画面実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `09` の keywords 画面実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `10` の pages 画面実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `11` の Cloud Run Jobs と Docker 化完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `12` の Cloud Scheduler と運用設定完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `13` の rewrites 機能実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `14` の internal_links 機能実装完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `15` の settings と tracked_keywords 管理完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `16` のアラートと通知基盤完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `17` の README と運用ドキュメント整備完了を確認し、一覧の進捗を更新。
+- 2026-03-16: WordPress 記事同期、施策成果判定、トピッククラスタ画面の追加要望を受け、`18` から `27` までの拡張チケットを追加。
+- 2026-03-16: `18` の WordPress 記事マスタ同期基盤完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `19` の sync_wordpress_posts Job 完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `20` の settings に WordPress 接続設定追加完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `21` の rewrites と WordPress 記事の紐付け完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `22` の internal_link_events 追加完了を確認し、一覧の進捗を更新。
+- 2026-03-16: `23` の施策成果判定ロジック追加完了を確認し、一覧の進捗を更新。
+- 2026-03-17: `24` の `pillar / cluster / intent` 拡張が schema、validation、`/settings` UI、filter/list まで実装済みであることを確認し、一覧の進捗を更新。
+- 2026-03-17: `25` の `/clusters` 画面、cluster 集計 SQL、drilldown 導線、README / ナビゲーション更新を実施し、一覧の進捗を更新。
+- 2026-03-17: `26` の既存画面 cluster 連携を実施し、`/pages`, `/keywords`, `/rewrites`, `/links` の filter、context panel、drilldown、cluster 別内部リンク課題表示まで反映して一覧の進捗を更新。
+- 2026-03-17: `27` の WordPress / cluster 運用ドキュメント整備を実施し、README、専用運用ガイド、decision log を更新して一覧の進捗を更新。
+- 2026-03-17: `28` の GCP デプロイと GitHub Actions を実施し、Cloud Run Service deploy、production manual run の Cloud Run Job 対応、CI / deploy workflow、README / docs 更新を反映した。
+- 2026-03-17: `28` の実環境反映として `baseballsite.seo_rank_tracker` の不足 migration を適用し、`family-fetch-gsc`, `family-fetch-gsc-daily`, `seo-rank-tracker-web` を deploy した。初回 fetch は Search Console property 権限不足で 0 rows のため、GSC access 付与が残課題。
+- 2026-03-17: 実運用サブドメインに合わせて本番 Job / Scheduler 名も `prosports-fetch-gsc`, `prosports-fetch-gsc-daily` へ切り替え、Web service の manual run 先も新 Job 名へ更新した。旧 `family-*` リソースは退避扱いで残す。

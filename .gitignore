@@ -1,0 +1,14 @@
+.next
+node_modules
+.env.local
+gha-creds-*.json
+.venv
+__pycache__
+*.pyc
+coverage
+dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
