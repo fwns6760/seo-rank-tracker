@@ -44,6 +44,7 @@ export {
 } from "@/lib/bq/rewrites";
 export {
   getOperationalSettings,
+  getTrackedKeywordCandidates,
   getTrackedKeywords,
   upsertOperationalSettings,
   upsertTrackedKeyword,
@@ -86,6 +87,7 @@ export type {
   RewriteComparisonRow,
   RewriteOpportunityRow,
   RewriteRecordRow,
+  TrackedKeywordCandidateRow,
   TrackedKeywordRow,
   WordPressPostRow,
 } from "@/lib/bq/types";

@@ -42,3 +42,7 @@
 - 2026-03-16: `components/manual-run-panel.tsx` を追加し、dashboard から日付指定、`skipBigQueryWrite` 指定、実行状態確認、ログ表示ができる UI を実装。
 - 2026-03-16: Python Job 側で `EXECUTION_ID` を受け取れるように調整し、API が返す `execution_id` とジョブログの値を揃えた。
 - 2026-03-16: `npm run typecheck`, `npm run lint`, `npm run build` を実行し、API route と dashboard UI を含めて通過を確認。
+- 2026-03-17: `manual-runs` API に構造化ログを追加し、validation error は `400`、想定外エラーは `500` を返す共通ルールへ補正した。`startDate > endDate` も API 側で早期に弾くようにした。
+- 2026-03-17: dashboard の manual run 時刻表示を `formatJstDateTime` ベースへ切り替え、利用者の実行環境 timezone に依存せず JST 表示になるよう補正した。
+- 2026-03-17: `validate_input` step の success が実検証前に出ていたため、manual run request validation を明示関数として切り出し、`validate_input` と `start_manual_run` の started/success を実処理順に揃えた。
+- 2026-03-17: `components/manual-run-panel.tsx` の UI エラー状態を action 別 title + message で持つようにし、start/refresh/poll 失敗の誤表示を解消した。client-side で日付未入力と start/end 逆転も弾くようにした。

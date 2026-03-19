@@ -69,3 +69,19 @@
 - 2026-03-17: `28` の GCP デプロイと GitHub Actions を実施し、Cloud Run Service deploy、production manual run の Cloud Run Job 対応、CI / deploy workflow、README / docs 更新を反映した。
 - 2026-03-17: `28` の実環境反映として `baseballsite.seo_rank_tracker` の不足 migration を適用し、`family-fetch-gsc`, `family-fetch-gsc-daily`, `seo-rank-tracker-web` を deploy した。初回 fetch は Search Console property 権限不足で 0 rows のため、GSC access 付与が残課題。
 - 2026-03-17: 実運用サブドメインに合わせて本番 Job / Scheduler 名も `prosports-fetch-gsc`, `prosports-fetch-gsc-daily` へ切り替え、Web service の manual run 先も新 Job 名へ更新した。旧 `family-*` リソースは退避扱いで残す。
+- 2026-03-17: 完了済みチケットの硬化として `04` `07` `17` を更新し、`duration_ms` の実時間補正、manual-runs API の 400/500 分離と構造化ログ、manual run の JST 表示、README / env example / API docs の不足補完を反映した。
+- 2026-03-17: 続けて `07` `15` `22` を硬化し、manual run validate step の順序補正、`tracked-keywords` / `app-config` / `internal-link-events` API の step ログ追加で、入力検証と BigQuery 書き込みを Cloud Logging で段階追跡できるようにした。
+- 2026-03-17: さらに `13` `15` `16` `22` の API を補正し、logger を env 検証より先に初期化して misconfiguration 時の無ログ失敗を防いだ。body 付き API は malformed JSON を `400` として返すよう統一した。
+- 2026-03-17: `01` を硬化し、`app/error.tsx` と `app/global-error.tsx` を追加して、server-side 例外時でも白画面ではなく retry / dashboard / settings 導線付きの fallback UI を出すようにした。
+- 2026-03-17: さらに `01` を硬化し、`app/loading.tsx` と共通 skeleton を追加して、server-side data fetch の待機中も blank screen にならないようにした。
+- 2026-03-17: 続けて `07` と `01` を硬化し、manual run パネルの action 別エラー表示と client-side 日付 validation、`app/not-found.tsx` による custom 404 fallback を追加した。
+- 2026-03-17: さらに `01` を硬化し、active route を示す client nav を追加して、運用画面間の現在地をヘッダーで即判別できるようにした。
+- 2026-03-17: `17` を硬化し、`GET /api/health` による readiness check を追加して Cloud Run / local の設定漏れを HTTP で確認できるようにした。
+- 2026-03-17: `17` を追補し、`/api/health` にも `execution_id` 付き構造化ログを入れて readiness check を Cloud Logging と突き合わせられるようにした。
+- 2026-03-17: `15` と `17` を硬化し、`/settings` に runtime health panel を追加して env 欠落時も画面が開くようにし、必須 env と manual run 設定状態を UI 上で確認できるようにした。
+- 2026-03-17: `17` をさらに硬化し、Web deploy script が service URL と `/api/health` を表示するようにして、deploy 後の readiness check をそのまま実行しやすくした。
+- 2026-03-17: `15` をさらに硬化し、`/settings` に未登録の GSC keyword / URL 候補パネルと form prefill 導線を追加して、`tracked_keywords` の初期投入を運用画面から進めやすくした。
+- 2026-03-19: `15` を追補し、`/settings` の `tracked_keywords` / 候補 / `app_settings` 読み込みを部分成功対応へ補強した。単一クエリ失敗時も成功したセクションは表示を継続し、失敗したセクションだけ警告表示する。
+- 2026-03-19: target domain に合わせた表示整合として、`/dashboard`, `/keywords`, `/pages`, `/rewrites`, `/links`, `/clusters`, `/settings` と関連 form の placeholder、cluster 運用ドキュメントの例示をスポーツ系サンプルへ更新した。
+- 2026-03-19: `11` `12` `14` `17` `28` を追補し、`crawl_internal_links` の Cloud Run Job / Scheduler 導線、GitHub Actions variables、README / 運用 docs、既定 schedule `06:30 JST` を追加して、本番 deploy 可能な形へ補強した。
+- 2026-03-19: `crawl_internal_links` の本番反映として `prosports-crawl-internal-links` Job と `prosports-crawl-internal-links-daily` Scheduler を deploy し、smoke run execution `prosports-crawl-internal-links-lrjnd` の成功まで確認した。

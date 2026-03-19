@@ -22,7 +22,7 @@ export type AlertFeedResult = {
 };
 
 function normalizeNullableFilter(value: NullableFilter) {
-  return value && value.length > 0 ? value : null;
+  return value && value.length > 0 ? value : "";
 }
 
 function coerceNumber(value: number | string | null | undefined) {

@@ -47,3 +47,4 @@
 - 2026-03-16: `app/keywords/page.tsx` と `app/pages/page.tsx` を更新し、rewrite 表示箇所から `/rewrites` へ遷移できる導線を追加。
 - 2026-03-16: `rewrite_type` は freeform 保存で UI はプリセット + custom、前後比較窓は 7 日、候補抽出条件は impressions 500 以上 / 平均順位 6-20 / CTR 3% 以下 / 30 日 cooldown とする判断を `docs/decisions.md` に記録。
 - 2026-03-16: `npm run build`, `npm run typecheck`, `npm run lint`, `python3 -m compileall jobs/fetch_gsc` を実行し、通過を確認。
+- 2026-03-17: `app/api/rewrites/route.ts` の logger 初期化を env 検証より先に移し、設定漏れでも構造化ログが残るよう補正した。JSON 構文エラーも validation error として `400` を返すようにした。

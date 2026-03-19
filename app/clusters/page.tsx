@@ -380,7 +380,7 @@ export default async function ClustersPage({ searchParams }: ClustersPageProps) 
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={pillarSearch ?? ""}
                 name="pillar"
-                placeholder="travel planning"
+                placeholder="MLB 分析"
                 type="text"
               />
             </label>
@@ -390,7 +390,7 @@ export default async function ClustersPage({ searchParams }: ClustersPageProps) 
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={clusterSearch ?? ""}
                 name="cluster"
-                placeholder="packing checklist"
+                placeholder="ドジャース戦レビュー"
                 type="text"
               />
             </label>

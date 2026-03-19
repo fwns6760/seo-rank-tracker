@@ -173,3 +173,10 @@
 - 背景: dashboard の manual run は当初ローカル process で Python Job を spawn する想定だったが、Cloud Run Service に Web アプリを載せる場合は Python runtime や instance-local メモリに依存した実装をそのまま使いづらい。
 - 判断: `/api/manual-runs` は `MANUAL_RUN_MODE=cloud_run_job` のとき Cloud Run Job API 経由で `fetch_gsc` を実行し、dashboard 上では local stdout / stderr tail の代わりに Cloud Run execution 状態を追跡する。
 - 理由: Web Service と Job を責務分離したまま本番の手動実行導線を維持でき、Cloud Run 上で Python process を直接抱え込まずに済むため。
+
+## 2026-03-19
+
+### crawl_internal_links の本番リソース名と定期実行時刻
+- 背景: `crawl_internal_links` はローカル実行だけ先に完成していたが、Cloud Run Job / Scheduler 化するにあたり、本番リソース名と `fetch_gsc` との実行順を決めないと GitHub Actions variables と運用 docs を確定できなかった。
+- 判断: `crawl_internal_links` の推奨本番 Job 名は `prosports-crawl-internal-links`、Scheduler 名は `prosports-crawl-internal-links-daily` とする。既定実行時刻は `Asia/Tokyo` の毎日 `06:30` とし、retry 方針は `fetch_gsc` と同じく Scheduler `0`、Cloud Run Job task retry `1` を使う。
+- 理由: `fetch_gsc` の既定 `06:00` 実行より後ろへずらすことで GSC 収集と crawl の競合を避けつつ、同じ朝の運用枠で最新データと最新リンク構造を並べて確認しやすくするため。

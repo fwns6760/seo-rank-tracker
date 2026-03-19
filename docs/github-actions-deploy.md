@@ -46,14 +46,30 @@ Optional repository variables:
 - `CLOUD_SCHEDULER_LOCATION`
 - `CLOUD_SCHEDULER_JOB_NAME`
 - `CLOUD_SCHEDULER_SERVICE_ACCOUNT`
+- `CRAWL_INTERNAL_LINKS_JOB_NAME`
+- `CRAWL_INTERNAL_LINKS_JOB_SERVICE_ACCOUNT`
+- `CRAWL_INTERNAL_LINKS_SECRET_MAPPINGS`
+- `CRAWL_INTERNAL_LINKS_IMAGE_TAG`
+- `CRAWL_INTERNAL_LINKS_DEFAULT_ARGS`
+- `CRAWL_INTERNAL_LINKS_START_URL`
+- `CRAWL_INTERNAL_LINKS_USER_AGENT`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT`
+- `CRAWL_INTERNAL_LINKS_SCHEDULE`
 
 ## Deploy behavior
 
 - Web app deploy は `bash scripts/deploy-web-service.sh`
 - `fetch_gsc` Job deploy は `bash scripts/deploy-fetch-gsc-job.sh`
-- Scheduler deploy は scheduler 用の variables が揃っている場合だけ実行
+- `crawl_internal_links` Job deploy は `bash scripts/deploy-crawl-internal-links-job.sh`
+- Scheduler deploy は `fetch_gsc` / `crawl_internal_links` それぞれ、対応する variables が揃っている場合だけ実行
 
-`workflow_dispatch` では Web app / Job / Scheduler を個別に on/off できます。
+Web app を public に保つ場合は、repository variable `WEB_ALLOW_UNAUTHENTICATED=true`
+を設定してください。未設定または `false` のまま次回 deploy すると、
+Cloud Run Service は再び認証必須に戻ります。
+
+`workflow_dispatch` では Web app / `fetch_gsc` / `crawl_internal_links` の deploy を個別に on/off できます。
 
 ## IAM notes
 

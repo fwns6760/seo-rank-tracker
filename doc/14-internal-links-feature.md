@@ -47,3 +47,5 @@
 - 2026-03-16: `app/links/page.tsx` を実装し、内部リンク一覧、404 リンク、孤立ページ、最新 crawl summary を確認できる画面を追加。
 - 2026-03-16: crawler の開始 URL は既定で `https://${TARGET_SITE_HOST}/`、orphan は最新 crawl で被リンク 0 かつ `daily_rankings` に存在する URL とする判断を `docs/decisions.md` に記録。
 - 2026-03-16: `npm run build`, `npm run typecheck`, `npm run lint`, `python3 -m compileall jobs/crawl_internal_links`, `.venv/bin/python -m unittest discover -s tests/crawl_internal_links -p 'test_*.py'`, `.venv/bin/python -m jobs.crawl_internal_links.main --help` を実行し、通過を確認。
+- 2026-03-19: `crawl_internal_links` を本番運用へ載せる補強として Cloud Run Job launcher / Dockerfile / deploy script と Cloud Scheduler deploy script を追加し、README / docs / GitHub Actions から deploy できる導線を整えた。
+- 2026-03-19: `prosports-crawl-internal-links` を本番 deploy し、`--max-pages=20` の smoke run execution `prosports-crawl-internal-links-lrjnd` が成功することを確認した。

@@ -11,11 +11,14 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getTargetSite() {
+  return process.env.TARGET_SITE_HOST?.trim() || "unknown";
+}
+
 export async function POST(request: Request) {
-  const env = getServerEnv();
   const logger = createJobLogger({
     jobName: "register_internal_link_event",
-    targetSite: env.targetSiteHost,
+    targetSite: getTargetSite(),
   });
 
   logger.logExecution({
@@ -24,9 +27,43 @@ export async function POST(request: Request) {
   });
 
   try {
+    getServerEnv();
     const body = (await request.json()) as unknown;
+
+    logger.logStep({
+      step: "validate_input",
+      stepStatus: "started",
+      message: "Validating internal link event payload",
+    });
     const input = normalizeInternalLinkEventInput(body);
+    logger.logStep({
+      step: "validate_input",
+      stepStatus: "success",
+      message: "Internal link event payload validated",
+      inputSummary: {
+        wp_post_id: input.wpPostId,
+        url: input.url,
+        change_date: input.changeDate,
+      },
+    });
+
+    logger.logStep({
+      step: "insert_internal_link_event",
+      stepStatus: "started",
+      message: "Inserting internal link event into BigQuery",
+    });
     const event = await createInternalLinkEvent(input);
+    logger.logStep({
+      step: "insert_internal_link_event",
+      stepStatus: "success",
+      message: "Internal link event inserted into BigQuery",
+      outputSummary: {
+        id: event.id,
+        wp_post_id: event.wp_post_id,
+        url: event.url,
+        change_date: event.change_date,
+      },
+    });
 
     logger.logExecution({
       status: "completed",
@@ -52,9 +89,12 @@ export async function POST(request: Request) {
       },
     );
   } catch (error) {
-    const isValidationError = error instanceof InternalLinkEventValidationError;
-    const message =
-      error instanceof Error
+    const isJsonError = error instanceof SyntaxError;
+    const isValidationError =
+      isJsonError || error instanceof InternalLinkEventValidationError;
+    const message = isJsonError
+      ? "Request body must be valid JSON"
+      : error instanceof Error
         ? error.message
         : "Failed to register internal link event";
 

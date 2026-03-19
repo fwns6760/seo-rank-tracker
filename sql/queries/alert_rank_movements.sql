@@ -3,10 +3,10 @@ WITH tracked AS (
     keyword,
     target_url,
     priority
-  FROM `${PROJECT_ID}.${DATASET}.tracked_keywords`
-  WHERE is_active = TRUE
-    AND (@keyword IS NULL OR keyword = @keyword)
-    AND (@url IS NULL OR target_url = @url)
+FROM `${PROJECT_ID}.${DATASET}.tracked_keywords`
+WHERE is_active = TRUE
+    AND (@keyword = '' OR keyword = @keyword)
+    AND (@url = '' OR target_url = @url)
 ),
 filtered AS (
   SELECT

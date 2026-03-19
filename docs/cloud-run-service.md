@@ -8,6 +8,7 @@
 - Next.js build mode: `output: "standalone"`
 
 `scripts/deploy-web-service.sh` は Cloud Build で image を build し、Cloud Run Service へ deploy します。
+deploy 完了後は service URL と `/api/health` の URL を標準出力へ表示します。
 
 ## Required deploy env vars
 
@@ -73,3 +74,15 @@ bash scripts/deploy-web-service.sh
 - Cloud Logging 上で Job execution を追えること
 
 必要権限は少なくとも `run.jobs.runWithOverrides`, `run.executions.get`, `run.executions.list` を含む必要があります。built-in role では対象 Job に対する `roles/run.developer` が扱いやすい構成です。
+
+## Readiness check
+
+`GET /api/health` は Web アプリの軽量な readiness endpoint です。必須 env がすべて揃っていれば `200`, 不足があれば `503` を返します。
+
+例:
+
+```bash
+curl "https://<cloud-run-service-url>/api/health"
+```
+
+`WEB_ALLOW_UNAUTHENTICATED=false` の場合は、Cloud Run console または認証付き curl / browser session から確認してください。

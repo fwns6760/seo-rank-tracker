@@ -20,8 +20,9 @@
   `--oauth-service-account-email` with scope
   `https://www.googleapis.com/auth/cloud-platform`
 
-Use `scripts/deploy-fetch-gsc-scheduler.sh` to create or update the Scheduler
-job from the repo root.
+Use `scripts/deploy-fetch-gsc-scheduler.sh` or
+`scripts/deploy-crawl-internal-links-scheduler.sh` to create or update one
+Scheduler job from the repo root.
 
 ## Execution schedule policy
 - Default schedule: `0 6 * * *`
@@ -45,7 +46,7 @@ Reasoning:
 - Container-level retries remain enabled once to absorb transient runtime
   failures inside the job.
 
-## Scheduler deployment script
+## fetch_gsc scheduler deployment
 Required env vars:
 - `GOOGLE_CLOUD_PROJECT`
 - `CLOUD_RUN_REGION`
@@ -79,6 +80,46 @@ export CLOUD_SCHEDULER_SERVICE_ACCOUNT="scheduler-invoker@your-project.iam.gserv
 bash scripts/deploy-fetch-gsc-scheduler.sh
 ```
 
+## crawl_internal_links scheduler deployment
+Required env vars:
+- `GOOGLE_CLOUD_PROJECT`
+- `CLOUD_RUN_REGION`
+- `CRAWL_INTERNAL_LINKS_JOB_NAME`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME`
+- `CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT`
+
+Optional env vars:
+- `CRAWL_INTERNAL_LINKS_SCHEDULE`
+- `CRAWL_INTERNAL_LINKS_TIME_ZONE`
+- `CRAWL_INTERNAL_LINKS_ATTEMPT_DEADLINE`
+- `CRAWL_INTERNAL_LINKS_MAX_RETRY_ATTEMPTS`
+- `CRAWL_INTERNAL_LINKS_MAX_RETRY_DURATION`
+- `CRAWL_INTERNAL_LINKS_MIN_BACKOFF`
+- `CRAWL_INTERNAL_LINKS_MAX_BACKOFF`
+- `CRAWL_INTERNAL_LINKS_MAX_DOUBLINGS`
+- `CRAWL_INTERNAL_LINKS_MESSAGE_BODY`
+- `CRAWL_INTERNAL_LINKS_DESCRIPTION`
+
+Example:
+
+```bash
+export GOOGLE_CLOUD_PROJECT="your-project"
+export CLOUD_RUN_REGION="asia-northeast1"
+export CRAWL_INTERNAL_LINKS_JOB_NAME="prosports-crawl-internal-links"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION="asia-northeast1"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME="prosports-crawl-internal-links-daily"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT="scheduler-invoker@your-project.iam.gserviceaccount.com"
+
+bash scripts/deploy-crawl-internal-links-scheduler.sh
+```
+
+Recommended defaults:
+- schedule: `30 6 * * *`
+- time zone: `Asia/Tokyo`
+- Cloud Scheduler retry: `0`
+- Cloud Run Job task retry: `1`
+
 ## Manual rerun workflow
 Backfill a specific date range:
 
@@ -95,6 +136,15 @@ Fetch only and skip BigQuery write:
 gcloud run jobs execute prosports-fetch-gsc \
   --region=asia-northeast1 \
   --args=--start-date=2026-03-16,--end-date=2026-03-16,--skip-bigquery-write \
+  --wait
+```
+
+Crawl one site snapshot:
+
+```bash
+gcloud run jobs execute prosports-crawl-internal-links \
+  --region=asia-northeast1 \
+  --args=--max-pages=60 \
   --wait
 ```
 

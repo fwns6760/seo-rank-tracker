@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState, useTransition } from "react";
+import { type FormEvent, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -22,38 +22,77 @@ type TrackedKeywordFormProps = {
     priority: string | null;
     is_active: boolean;
   } | null;
+  draftTrackedKeyword?: {
+    keyword: string;
+    target_url: string;
+    priority?: string | null;
+  } | null;
 };
 
 export function TrackedKeywordForm({
   currentFiltersHref,
   initialTrackedKeyword,
+  draftTrackedKeyword,
 }: TrackedKeywordFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [keyword, setKeyword] = useState(initialTrackedKeyword?.keyword ?? "");
+  const [keyword, setKeyword] = useState(
+    initialTrackedKeyword?.keyword ?? draftTrackedKeyword?.keyword ?? "",
+  );
   const [targetUrl, setTargetUrl] = useState(
-    initialTrackedKeyword?.target_url ?? "",
+    initialTrackedKeyword?.target_url ?? draftTrackedKeyword?.target_url ?? "",
   );
-  const [category, setCategory] = useState(
-    initialTrackedKeyword?.category ?? "",
-  );
-  const [pillar, setPillar] = useState(
-    initialTrackedKeyword?.pillar ?? "",
-  );
-  const [cluster, setCluster] = useState(
-    initialTrackedKeyword?.cluster ?? "",
-  );
-  const [intent, setIntent] = useState(
-    initialTrackedKeyword?.intent ?? "",
-  );
+  const [category, setCategory] = useState(initialTrackedKeyword?.category ?? "");
+  const [pillar, setPillar] = useState(initialTrackedKeyword?.pillar ?? "");
+  const [cluster, setCluster] = useState(initialTrackedKeyword?.cluster ?? "");
+  const [intent, setIntent] = useState(initialTrackedKeyword?.intent ?? "");
   const [priority, setPriority] = useState(
-    initialTrackedKeyword ? initialTrackedKeyword.priority ?? "" : "medium",
+    initialTrackedKeyword
+      ? initialTrackedKeyword.priority ?? ""
+      : draftTrackedKeyword?.priority ?? "medium",
   );
   const [isActive, setIsActive] = useState(
     initialTrackedKeyword?.is_active ?? true,
   );
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const hasSelection = Boolean(initialTrackedKeyword || draftTrackedKeyword);
+  const heading = initialTrackedKeyword
+    ? {
+        title: "監視対象キーワードを編集",
+        description:
+          "既存 row を更新します。logical key は `keyword + target_url` です。",
+      }
+    : draftTrackedKeyword
+      ? {
+          title: "GSC 候補から新規追加",
+          description:
+            "直近の `daily_rankings` から keyword / URL を prefill 済みです。taxonomy を補って保存してください。",
+        }
+      : {
+          title: "監視対象キーワード",
+          description:
+            "keyword と target URL を登録し、cluster 分析に使う pillar / cluster / intent も管理します。",
+        };
+
+  useEffect(() => {
+    setKeyword(initialTrackedKeyword?.keyword ?? draftTrackedKeyword?.keyword ?? "");
+    setTargetUrl(
+      initialTrackedKeyword?.target_url ?? draftTrackedKeyword?.target_url ?? "",
+    );
+    setCategory(initialTrackedKeyword?.category ?? "");
+    setPillar(initialTrackedKeyword?.pillar ?? "");
+    setCluster(initialTrackedKeyword?.cluster ?? "");
+    setIntent(initialTrackedKeyword?.intent ?? "");
+    setPriority(
+      initialTrackedKeyword
+        ? initialTrackedKeyword.priority ?? ""
+        : draftTrackedKeyword?.priority ?? "medium",
+    );
+    setIsActive(initialTrackedKeyword?.is_active ?? true);
+    setStatusMessage(null);
+    setHasError(false);
+  }, [draftTrackedKeyword, initialTrackedKeyword]);
 
   function resetForm() {
     setKeyword("");
@@ -122,12 +161,12 @@ export function TrackedKeywordForm({
     <section className="rounded-[1.5rem] border border-border/70 bg-card/80 p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium">監視対象キーワード</p>
+          <p className="text-sm font-medium">{heading.title}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            keyword と target URL を登録し、cluster 分析に使う pillar / cluster / intent も管理します。
+            {heading.description}
           </p>
         </div>
-        {initialTrackedKeyword ? (
+        {hasSelection ? (
           <Button
             onClick={() => {
               router.replace(currentFiltersHref);
@@ -136,7 +175,7 @@ export function TrackedKeywordForm({
             type="button"
             variant="outline"
           >
-            Clear edit
+            Clear selection
           </Button>
         ) : null}
       </div>
@@ -148,7 +187,7 @@ export function TrackedKeywordForm({
             <input
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="例: family travel"
+              placeholder="例: 大谷翔平 ホームラン"
               type="text"
               value={keyword}
             />
@@ -171,7 +210,7 @@ export function TrackedKeywordForm({
             <input
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
               onChange={(event) => setCategory(event.target.value)}
-              placeholder="family / travel / guide"
+              placeholder="npb / mlb / analysis"
               type="text"
               value={category}
             />
@@ -181,7 +220,7 @@ export function TrackedKeywordForm({
             <input
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
               onChange={(event) => setPillar(event.target.value)}
-              placeholder="travel planning"
+              placeholder="MLB 分析"
               type="text"
               value={pillar}
             />
@@ -191,7 +230,7 @@ export function TrackedKeywordForm({
             <input
               className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
               onChange={(event) => setCluster(event.target.value)}
-              placeholder="packing checklist"
+              placeholder="ドジャース戦レビュー"
               type="text"
               value={cluster}
             />
@@ -246,6 +285,11 @@ export function TrackedKeywordForm({
           `category` は既存の運用ラベル、`pillar / cluster` は SEO テーマ構造、`intent`
           は固定語彙の検索意図です。`cluster` を入れる場合は `pillar` も必要です。
         </p>
+        {!initialTrackedKeyword && draftTrackedKeyword?.priority === "high" ? (
+          <p className="text-sm text-muted-foreground">
+            この候補は初期投入向けに `priority=high` を初期値にしています。
+          </p>
+        ) : null}
 
         {statusMessage ? (
           <p
@@ -259,7 +303,11 @@ export function TrackedKeywordForm({
         ) : null}
 
         <Button disabled={isPending} type="submit">
-          {isPending ? "Saving..." : initialTrackedKeyword ? "Update keyword" : "Add keyword"}
+          {isPending
+            ? "Saving..."
+            : initialTrackedKeyword
+              ? "Update keyword"
+              : "Add keyword"}
         </Button>
       </form>
     </section>

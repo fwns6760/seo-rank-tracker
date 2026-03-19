@@ -359,7 +359,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={keyword ?? ""}
                 name="keyword"
-                placeholder="例: family travel"
+                placeholder="例: 大谷翔平 ホームラン"
                 type="text"
               />
             </label>

@@ -45,3 +45,4 @@
 - 2026-03-16: `components/alert-dispatch-panel.tsx` と `app/dashboard/page.tsx` を更新し、dashboard 上で rank drop / rise / index anomaly を一覧表示し、手動で Slack 通知を送れる導線を追加。
 - 2026-03-16: rank movement は直近 `7` 日比較、index anomaly は「直近 `3` 日データなし + その前 `30` 日に impressions 実績あり」、通知入口は `/api/alerts/dispatch` とする判断を `docs/decisions.md` に記録。
 - 2026-03-16: `npm run build`, `npm run typecheck`, `npm run lint` を実行し、通過を確認。
+- 2026-03-17: `app/api/alerts/dispatch/route.ts` の logger 初期化を env 検証より先に移し、設定不足でも alert dispatch failure を構造化ログで追えるよう補正した。

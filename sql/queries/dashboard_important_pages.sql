@@ -6,8 +6,8 @@ SELECT
   AVG(position) AS average_position
 FROM `${PROJECT_ID}.${DATASET}.daily_rankings`
 WHERE date BETWEEN @start_date AND @end_date
-  AND (@keyword IS NULL OR keyword = @keyword)
-  AND (@url IS NULL OR url = @url)
+  AND (@keyword = '' OR keyword = @keyword)
+  AND (@url = '' OR url = @url)
 GROUP BY url
 ORDER BY impressions DESC, clicks DESC
 LIMIT @limit;

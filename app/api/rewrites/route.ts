@@ -11,11 +11,14 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getTargetSite() {
+  return process.env.TARGET_SITE_HOST?.trim() || "unknown";
+}
+
 export async function POST(request: Request) {
-  const env = getServerEnv();
   const logger = createJobLogger({
     jobName: "register_rewrite",
-    targetSite: env.targetSiteHost,
+    targetSite: getTargetSite(),
   });
 
   logger.logExecution({
@@ -24,6 +27,7 @@ export async function POST(request: Request) {
   });
 
   try {
+    getServerEnv();
     const body = (await request.json()) as unknown;
 
     logger.logStep({
@@ -82,9 +86,14 @@ export async function POST(request: Request) {
       },
     );
   } catch (error) {
-    const isValidationError = error instanceof RewriteValidationError;
-    const message =
-      error instanceof Error ? error.message : "Failed to register rewrite";
+    const isJsonError = error instanceof SyntaxError;
+    const isValidationError =
+      isJsonError || error instanceof RewriteValidationError;
+    const message = isJsonError
+      ? "Request body must be valid JSON"
+      : error instanceof Error
+        ? error.message
+        : "Failed to register rewrite";
 
     logger.logError(error, {
       message: "Rewrite registration failed",

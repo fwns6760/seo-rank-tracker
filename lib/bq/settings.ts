@@ -1,5 +1,9 @@
 import { runNamedQuery } from "@/lib/bq/query-runner";
-import type { AppSettingRow, TrackedKeywordRow } from "@/lib/bq/types";
+import type {
+  AppSettingRow,
+  TrackedKeywordCandidateRow,
+  TrackedKeywordRow,
+} from "@/lib/bq/types";
 import {
   appSettingKeys,
   getDefaultOperationalSettings,
@@ -58,6 +62,31 @@ export async function getTrackedKeywords({
     pillar_search: pillarSearch?.trim() ? pillarSearch.trim() : null,
     cluster_search: clusterSearch?.trim() ? clusterSearch.trim() : null,
     status_filter: statusFilter ?? null,
+    limit,
+  });
+}
+
+/**
+ * Returns recent keyword/url pairs from GSC data that are not yet registered in tracked_keywords.
+ */
+export async function getTrackedKeywordCandidates({
+  startDate,
+  endDate,
+  keywordSearch,
+  targetUrlSearch,
+  limit = 12,
+}: {
+  startDate: string;
+  endDate: string;
+  keywordSearch?: string | null;
+  targetUrlSearch?: string | null;
+  limit?: number;
+}) {
+  return runNamedQuery<TrackedKeywordCandidateRow>("tracked_keyword_candidates", {
+    start_date: startDate,
+    end_date: endDate,
+    keyword_search: keywordSearch?.trim() ? keywordSearch.trim() : null,
+    target_url_search: targetUrlSearch?.trim() ? targetUrlSearch.trim() : null,
     limit,
   });
 }

@@ -312,7 +312,7 @@ export function RewriteRegistrationForm({
             className="min-h-24 w-full rounded-2xl border border-input bg-background px-3 py-3 text-sm outline-none"
             maxLength={280}
             onChange={(event) => setSummary(event.target.value)}
-            placeholder="例: タイトルと導入文を family travel 向けに更新"
+            placeholder="例: タイトルと導入文をドジャース戦レビュー向けに更新"
             value={summary}
           />
         </label>

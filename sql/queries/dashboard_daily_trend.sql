@@ -4,10 +4,10 @@ WITH filtered AS (
     url,
     keyword,
     position
-  FROM `${PROJECT_ID}.${DATASET}.daily_rankings`
-  WHERE date BETWEEN @start_date AND @end_date
-    AND (@keyword IS NULL OR keyword = @keyword)
-    AND (@url IS NULL OR url = @url)
+FROM `${PROJECT_ID}.${DATASET}.daily_rankings`
+WHERE date BETWEEN @start_date AND @end_date
+    AND (@keyword = '' OR keyword = @keyword)
+    AND (@url = '' OR url = @url)
 ),
 rank_deltas AS (
   SELECT
@@ -30,4 +30,3 @@ SELECT
 FROM rank_deltas
 GROUP BY date
 ORDER BY date ASC;
-

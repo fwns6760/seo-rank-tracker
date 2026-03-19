@@ -47,3 +47,9 @@
 - 2026-03-16: `app_settings` を設定保存先として追加し、既存 Job は当面 env を参照したまま後続チケットで `app_settings` を読む方針、`tracked_keywords` は `keyword + target_url` を論理キーにする判断を `docs/decisions.md` に記録。
 - 2026-03-16: `app_settings` への更新は同時 `MERGE` を避けて逐次実行にし、`priority` と `schedulerTimeJst` の validation を補強。
 - 2026-03-16: `npm run build`, `npm run typecheck`, `npm run lint` を実行し、通過を確認。
+- 2026-03-17: `tracked-keywords` と `app-config` API に `validate_input` / `upsert_*` の started/success step ログを追加し、settings 更新の入力検証と BigQuery 反映を Cloud Logging 上で段階的に追えるようにした。
+- 2026-03-17: settings API の logger を env 検証より先に初期化し、環境変数不足でも `execution_id` 付き失敗ログを残せるよう補正した。JSON 構文エラーも validation error として `400` へ寄せた。
+- 2026-03-17: `/settings` 画面に runtime health panel を追加し、必須 env と manual run の Cloud Run 設定状態を UI から確認できるようにした。env 欠落時も `getSafeDefaultOperationalSettings()` で画面自体は開くよう補正した。
+- 2026-03-17: `/settings` に直近 90 日の `daily_rankings` から未登録 keyword / URL ペアを拾う `GSC 追加候補` パネルを追加し、候補クリックで `TrackedKeywordForm` を prefill して新規登録へつなげられるようにした。
+- 2026-03-17: 初期の `tracked_keywords` は高インプレッション記事を優先する方針に合わせ、`GSC 追加候補` の説明を補強し、候補からの prefill 時は `priority=high` を既定値にした。
+- 2026-03-19: `/settings` のデータ取得を `Promise.allSettled()` ベースへ切り替え、`tracked_keywords` / 候補 / `app_settings` のどれか一つが失敗しても成功したセクションは表示を継続し、失敗セクションだけ警告表示するように補強した。

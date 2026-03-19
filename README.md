@@ -68,6 +68,8 @@ npm run lint
 | `TARGET_SITE_HOST` | 必須 | 例: `prosports.yoshilover.com` |
 | `GOOGLE_APPLICATION_CREDENTIALS` | 条件付き | ローカルで JSON キーファイルを使う場合のパス |
 | `GOOGLE_APPLICATION_CREDENTIALS_JSON` | 条件付き | Secret Manager 経由で JSON を環境変数注入する場合 |
+| `INTERNAL_LINKS_START_URL` | 任意 | `crawl_internal_links` の開始 URL。未指定時は `https://${TARGET_SITE_HOST}/` |
+| `INTERNAL_LINKS_USER_AGENT` | 任意 | `crawl_internal_links` の User-Agent override |
 | `WORDPRESS_BASE_URL` | 条件付き | `sync_wordpress_posts` の接続先 URL。env 未指定時は `app_settings` を参照 |
 | `WORDPRESS_AUTH_MODE` | 任意 | `none` または `basic`。未指定時は env / `app_settings` / 認証情報の有無から解決 |
 | `WORDPRESS_POST_TYPE` | 任意 | 既定は `posts`。env 未指定時は `app_settings` を参照 |
@@ -114,7 +116,7 @@ sh scripts/run-fetch-gsc.sh --start-date=2026-03-16 --end-date=2026-03-16 --skip
 内部リンク crawl をローカル実行:
 
 ```bash
-.venv/bin/python -m jobs.crawl_internal_links.main
+sh scripts/run-crawl-internal-links.sh
 ```
 
 WordPress 記事同期をローカル実行:
@@ -129,6 +131,12 @@ Slack 通知をローカルから叩く:
 
 ```bash
 curl -X POST http://localhost:3000/api/alerts/dispatch
+```
+
+readiness を確認:
+
+```bash
+curl http://localhost:3000/api/health
 ```
 
 ## WordPress / Cluster 運用
@@ -211,6 +219,7 @@ done
 - `0006_create_wp_posts.sql`
 - `0007_add_wp_post_id_to_rewrites.sql`
 - `0008_create_internal_link_events.sql`
+- `0009_add_cluster_fields_to_tracked_keywords.sql`
 
 SQL の配置ルールは [sql/README.md](./sql/README.md) を参照してください。
 
@@ -245,10 +254,19 @@ bash scripts/deploy-web-service.sh
 - `scripts/deploy-web-service.sh` は `Dockerfile` と `cloudbuild.web.yaml` を使って Web アプリ image を build し、Cloud Run Service へ deploy します。
 - `MANUAL_RUN_FETCH_GSC_JOB_NAME` を指定した場合、script は自動で `MANUAL_RUN_MODE=cloud_run_job` を有効化します。
 - dashboard から `fetch_gsc` を起動する場合、Web Service の service account には対象 Job への `run.jobs.runWithOverrides`, `run.executions.get`, `run.executions.list` を含む権限が必要です。運用上は `roles/run.developer` を Job 側へ付与するのが簡単です。
+- deploy script は完了後に service URL と `/api/health` の URL も表示します。
+
+3. deploy 後に readiness を確認します。
+
+```bash
+curl "<cloud-run-service-url>/api/health"
+```
 
 ## Cloud Run Jobs デプロイ手順
 
-現在スクリプト化されている本番 Job は `fetch_gsc` です。詳細は [docs/cloud-run-jobs.md](./docs/cloud-run-jobs.md) を参照してください。
+現在スクリプト化されている本番 Job は `fetch_gsc` と `crawl_internal_links` です。詳細は [docs/cloud-run-jobs.md](./docs/cloud-run-jobs.md) を参照してください。
+
+### `fetch_gsc`
 
 1. 必須環境変数を export します。
 
@@ -284,11 +302,50 @@ gcloud run jobs execute "${CLOUD_RUN_JOB_NAME}" \
 
 - `fetch_gsc` は `jobs/fetch_gsc/Dockerfile` を使用します。
 - Cloud Run Job は `scripts/run-fetch-gsc.sh` 経由で `python -m jobs.fetch_gsc.main` を起動します。
-- `crawl_internal_links` はローカル実行コードまでは実装済みですが、Cloud Run Job 化スクリプトはまだ追加していません。
+
+### `crawl_internal_links`
+
+1. 必須環境変数を export します。
+
+```bash
+export GOOGLE_CLOUD_PROJECT="your-project"
+export CLOUD_RUN_REGION="asia-northeast1"
+export ARTIFACT_REGISTRY_REPOSITORY="seo-rank-tracker"
+export CRAWL_INTERNAL_LINKS_JOB_NAME="prosports-crawl-internal-links"
+export CRAWL_INTERNAL_LINKS_JOB_SERVICE_ACCOUNT="crawl-internal-links@your-project.iam.gserviceaccount.com"
+export BIGQUERY_DATASET="seo_rank_tracker"
+export BIGQUERY_LOCATION="asia-northeast1"
+export TARGET_SITE_HOST="prosports.yoshilover.com"
+export CRAWL_INTERNAL_LINKS_START_URL="https://prosports.yoshilover.com/"
+```
+
+2. build と deploy を実行します。
+
+```bash
+bash scripts/deploy-crawl-internal-links-job.sh
+```
+
+3. 手動実行例:
+
+```bash
+gcloud run jobs execute "${CRAWL_INTERNAL_LINKS_JOB_NAME}" \
+  --region="${CLOUD_RUN_REGION}" \
+  --args=--max-pages=60 \
+  --wait
+```
+
+補足:
+
+- `crawl_internal_links` は `jobs/crawl_internal_links/Dockerfile` を使用します。
+- Cloud Run Job は `scripts/run-crawl-internal-links.sh` 経由で `python -m jobs.crawl_internal_links.main` を起動します。
+- 開始 URL は env 未指定時に `https://${TARGET_SITE_HOST}/` を使います。
+- `--max-pages` や `--request-timeout-seconds` を Job 既定値にしたい場合は `CRAWL_INTERNAL_LINKS_DEFAULT_ARGS` を使います。
 
 ## Cloud Scheduler 設定手順
 
 Cloud Scheduler の詳細は [docs/cloud-scheduler-operations.md](./docs/cloud-scheduler-operations.md) を参照してください。
+
+### `fetch_gsc`
 
 1. `fetch_gsc` Job を先に deploy します。
 2. Scheduler 用 service account を用意し、Cloud Run Admin API を叩ける権限を付与します。
@@ -316,6 +373,34 @@ bash scripts/deploy-fetch-gsc-scheduler.sh
 - Cloud Scheduler retry: `0`
 - Cloud Run Job task retry: `1`
 
+### `crawl_internal_links`
+
+1. `crawl_internal_links` Job を先に deploy します。
+2. Scheduler 用 service account を用意し、Cloud Run Admin API を叩ける権限を付与します。
+3. 次の環境変数を設定して deploy します。
+
+```bash
+export GOOGLE_CLOUD_PROJECT="your-project"
+export CLOUD_RUN_REGION="asia-northeast1"
+export CRAWL_INTERNAL_LINKS_JOB_NAME="prosports-crawl-internal-links"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION="asia-northeast1"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME="prosports-crawl-internal-links-daily"
+export CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT="scheduler-invoker@your-project.iam.gserviceaccount.com"
+```
+
+4. create / update を実行します。
+
+```bash
+bash scripts/deploy-crawl-internal-links-scheduler.sh
+```
+
+既定値:
+
+- schedule: `30 6 * * *`
+- time zone: `Asia/Tokyo`
+- Cloud Scheduler retry: `0`
+- Cloud Run Job task retry: `1`
+
 ## GitHub Actions
 
 GitHub Actions による CI / deploy 手順は [docs/github-actions-deploy.md](./docs/github-actions-deploy.md) を参照してください。
@@ -323,7 +408,7 @@ GitHub Actions による CI / deploy 手順は [docs/github-actions-deploy.md](.
 - `.github/workflows/ci.yml`
   - `npm run typecheck`, `npm run lint`, `npm run build`, Python unittest を実行します。
 - `.github/workflows/deploy-gcp.yml`
-  - `main` push または `workflow_dispatch` で Cloud Run Service、`fetch_gsc` Job、Scheduler を deploy できます。
+  - `main` push または `workflow_dispatch` で Cloud Run Service、`fetch_gsc` Job / Scheduler、`crawl_internal_links` Job / Scheduler を deploy できます。
 - 認証は Workload Identity Federation 前提です。
 - deploy workflow は repo variables から GCP の resource 名や dataset を読み、repo secrets から WIF 設定を読みます。
 
@@ -374,7 +459,6 @@ gcloud logging read \
 ## 既知の制約
 
 - `fetch_scrape` は未実装です。
-- `crawl_internal_links` はローカル実行コードのみで、Cloud Run Job deploy script は未整備です。
 - alert 通知には配信履歴テーブルがないため、`/api/alerts/dispatch` を繰り返し実行すると同じ alert を再送します。
 - `fetch_gsc` / `crawl_internal_links` は `app_settings` をまだ読まず、env ベースで動きます。
 - `sync_wordpress_posts` は平文設定を `app_settings` から読めますが、`WORDPRESS_APPLICATION_PASSWORD` 自体は env / Secret Manager 注入が必要です。
@@ -390,7 +474,6 @@ gcloud logging read \
 ## 将来の拡張項目
 
 - `fetch_scrape` 実装と feature flag 制御
-- `crawl_internal_links` の Cloud Run Job / Scheduler 化
 - `sync_wordpress_posts` の Cloud Run Job / Scheduler 化
 - alert 配信履歴の保存と重複送信抑止
 - Slack 以外の通知先追加

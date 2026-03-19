@@ -4,6 +4,10 @@
 
 ## Routes
 
+- `GET /api/health`
+  - 必須 env の充足状況を返す readiness check。`execution_id` を返し、未設定がある場合は `503`
+- `GET /api/manual-runs`
+  - 直近の手動実行一覧を返す
 - `POST /api/manual-runs`
   - `fetch_gsc` をローカル process または Cloud Run Job として起動し、追跡用 run 情報を返す
 - `GET /api/manual-runs/:executionId`

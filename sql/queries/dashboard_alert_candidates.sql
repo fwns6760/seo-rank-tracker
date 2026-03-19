@@ -6,10 +6,10 @@ WITH filtered AS (
     position,
     clicks,
     impressions
-  FROM `${PROJECT_ID}.${DATASET}.daily_rankings`
-  WHERE date BETWEEN @start_date AND @end_date
-    AND (@keyword IS NULL OR keyword = @keyword)
-    AND (@url IS NULL OR url = @url)
+FROM `${PROJECT_ID}.${DATASET}.daily_rankings`
+WHERE date BETWEEN @start_date AND @end_date
+    AND (@keyword = '' OR keyword = @keyword)
+    AND (@url = '' OR url = @url)
 ),
 ranked AS (
   SELECT
@@ -41,4 +41,3 @@ GROUP BY url, keyword
 HAVING previous_position IS NOT NULL
 ORDER BY ABS(position_delta) DESC, latest_impressions DESC
 LIMIT @limit;
-

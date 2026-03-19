@@ -19,6 +19,13 @@ const STORE_KEY = "__seo_rank_tracker_manual_runs__";
 
 type ManualRunStore = Map<string, ManualRunRecord>;
 
+export class ManualRunValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ManualRunValidationError";
+  }
+}
+
 function getStore() {
   const globalStore = globalThis as typeof globalThis & {
     [STORE_KEY]?: ManualRunStore;
@@ -132,13 +139,27 @@ function getJobCommand(request: ManualRunRequest, executionId: string) {
   };
 }
 
-function ensureRequestIsValid(request: ManualRunRequest) {
+export function validateManualRunRequest(request: ManualRunRequest) {
   if (request.jobName !== "fetch_gsc") {
-    throw new Error(`Unsupported manual run job: ${request.jobName}`);
+    throw new ManualRunValidationError(
+      `Unsupported manual run job: ${request.jobName}`,
+    );
   }
 
   if (!isIsoDate(request.startDate) || !isIsoDate(request.endDate)) {
-    throw new Error("startDate and endDate must use YYYY-MM-DD format");
+    throw new ManualRunValidationError(
+      "startDate and endDate must use YYYY-MM-DD format",
+    );
+  }
+
+  if (
+    request.startDate &&
+    request.endDate &&
+    request.startDate.localeCompare(request.endDate) > 0
+  ) {
+    throw new ManualRunValidationError(
+      "startDate must be on or before endDate",
+    );
   }
 }
 
@@ -155,7 +176,7 @@ function cloneRecord(record: ManualRunRecord) {
  * Starts a local background process for a supported manual job.
  */
 export async function startManualRun(request: ManualRunRequest) {
-  ensureRequestIsValid(request);
+  validateManualRunRequest(request);
 
   if (getManualRunMode() === "cloud_run_job") {
     return startCloudRunManualRun(request);

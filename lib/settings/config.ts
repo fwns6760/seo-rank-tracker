@@ -61,3 +61,43 @@ export function getDefaultOperationalSettings(): OperationalSettings {
     wordpressPostStatuses: env.wordpressPostStatuses ?? "publish",
   };
 }
+
+/**
+ * Returns a non-throwing fallback used by operator UI when required env is incomplete.
+ */
+export function getSafeDefaultOperationalSettings(): OperationalSettings {
+  try {
+    return getDefaultOperationalSettings();
+  } catch {
+    const targetSiteHost = process.env.TARGET_SITE_HOST?.trim() ?? "";
+    const wordpressBaseUrl =
+      process.env.WORDPRESS_BASE_URL?.trim() ||
+      (targetSiteHost ? `https://${targetSiteHost}` : "");
+    const wordpressUsername = process.env.WORDPRESS_USERNAME?.trim() ?? "";
+    const wordpressApplicationPasswordSecretName =
+      process.env.WORDPRESS_APPLICATION_PASSWORD_SECRET_NAME?.trim() ?? "";
+    const wordpressAuthMode =
+      process.env.WORDPRESS_AUTH_MODE?.trim() === "basic" ||
+      process.env.WORDPRESS_AUTH_MODE?.trim() === "none"
+        ? (process.env.WORDPRESS_AUTH_MODE.trim() as WordPressAuthMode)
+        : wordpressUsername && wordpressApplicationPasswordSecretName
+          ? "basic"
+          : "none";
+
+    return {
+      alertDropThreshold: 3,
+      alertRiseThreshold: 3,
+      rewriteCandidateMinImpressions: 500,
+      slackWebhookUrl: "",
+      schedulerTimeJst: "06:00",
+      targetSiteHost,
+      wordpressBaseUrl,
+      wordpressAuthMode,
+      wordpressUsername,
+      wordpressApplicationPasswordSecretName,
+      wordpressPostType: process.env.WORDPRESS_POST_TYPE?.trim() || "posts",
+      wordpressPostStatuses:
+        process.env.WORDPRESS_POST_STATUSES?.trim() || "publish",
+    };
+  }
+}

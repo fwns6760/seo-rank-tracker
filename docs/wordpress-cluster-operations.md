@@ -92,9 +92,9 @@
 
 例:
 
-- `pillar`: `family travel`
-- `cluster`: `packing checklist`
-- `cluster`: `hotel tips`
+- `pillar`: `MLB 分析`
+- `cluster`: `ドジャース戦レビュー`
+- `cluster`: `先発ローテ予想`
 
 ## 5. 日常運用フロー
 

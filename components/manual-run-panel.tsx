@@ -11,6 +11,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import type { ManualRunRecord } from "@/lib/manual-runs/types";
+import { formatJstDateTime } from "@/lib/time/jst";
 
 type ManualRunPanelProps = {
   initialStartDate: string;
@@ -19,6 +20,11 @@ type ManualRunPanelProps = {
 
 type RunResponse = {
   run: ManualRunRecord;
+};
+
+type ManualRunUiError = {
+  message: string;
+  title: string;
 };
 
 function getStatusIcon(status: ManualRunRecord["status"]) {
@@ -41,19 +47,37 @@ export function ManualRunPanel({
   const [endDate, setEndDate] = useState(initialEndDate);
   const [skipBigQueryWrite, setSkipBigQueryWrite] = useState(false);
   const [run, setRun] = useState<ManualRunRecord | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<ManualRunUiError | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  function setUiError(title: string, message: string) {
+    setApiError({
+      title,
+      message,
+    });
+  }
 
   async function refreshRun(executionId: string) {
     const response = await fetch(`/api/manual-runs/${executionId}`, {
       cache: "no-store",
     });
 
+    const payload = (await response.json()) as
+      | RunResponse
+      | { error?: string };
+
     if (!response.ok) {
+      throw new Error(
+        "error" in payload && payload.error
+          ? payload.error
+          : "Failed to refresh manual run status",
+      );
+    }
+
+    if (!("run" in payload)) {
       throw new Error("Failed to refresh manual run status");
     }
 
-    const payload = (await response.json()) as RunResponse;
     setRun(payload.run);
   }
 
@@ -64,7 +88,8 @@ export function ManualRunPanel({
 
     const poll = () => {
       void refreshRun(run.executionId).catch((error) => {
-        setApiError(
+        setUiError(
+          "Manual run status polling failed",
           error instanceof Error
             ? error.message
             : "Failed to poll manual run status",
@@ -79,8 +104,26 @@ export function ManualRunPanel({
     return () => window.clearInterval(intervalId);
   }, [run]);
 
+  function validateDates() {
+    if (!startDate || !endDate) {
+      return "Start date and end date are required.";
+    }
+
+    if (startDate.localeCompare(endDate) > 0) {
+      return "Start date must be on or before end date.";
+    }
+
+    return null;
+  }
+
   function handleSubmit() {
     setApiError(null);
+    const validationMessage = validateDates();
+
+    if (validationMessage) {
+      setUiError("Manual run input is invalid", validationMessage);
+      return;
+    }
 
     startTransition(() => {
       void (async () => {
@@ -110,7 +153,8 @@ export function ManualRunPanel({
 
           setRun(payload.run);
         } catch (error) {
-          setApiError(
+          setUiError(
+            "Manual run failed to start",
             error instanceof Error ? error.message : "Failed to start manual run",
           );
         }
@@ -187,7 +231,8 @@ export function ManualRunPanel({
                 }
 
                 void refreshRun(run.executionId).catch((error) => {
-                  setApiError(
+                  setUiError(
+                    "Manual run status refresh failed",
                     error instanceof Error
                       ? error.message
                       : "Failed to refresh manual run status",
@@ -206,9 +251,9 @@ export function ManualRunPanel({
         <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-destructive">
             <AlertTriangle className="h-4 w-4" />
-            Manual run failed to start
+            {apiError.title}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{apiError}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{apiError.message}</p>
         </div>
       ) : null}
 
@@ -231,12 +276,10 @@ export function ManualRunPanel({
               ) : null}
             </div>
             <div className="text-sm text-muted-foreground">
-              <p>Started: {new Date(run.startedAt).toLocaleString("ja-JP")}</p>
+              <p>Started: {formatJstDateTime(run.startedAt)}</p>
               <p>
                 Finished:{" "}
-                {run.finishedAt
-                  ? new Date(run.finishedAt).toLocaleString("ja-JP")
-                  : "--"}
+                {run.finishedAt ? formatJstDateTime(run.finishedAt) : "--"}
               </p>
             </div>
           </div>

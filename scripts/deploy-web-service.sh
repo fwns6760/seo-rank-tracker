@@ -100,3 +100,13 @@ if [[ -n "${WEB_SECRET_MAPPINGS}" ]]; then
 fi
 
 gcloud "${deploy_args[@]}"
+
+SERVICE_URL="$(gcloud run services describe "${CLOUD_RUN_SERVICE_NAME}" \
+  --project="${GOOGLE_CLOUD_PROJECT}" \
+  --region="${CLOUD_RUN_REGION}" \
+  --format='value(status.url)')"
+
+if [[ -n "${SERVICE_URL}" ]]; then
+  echo "Cloud Run service URL: ${SERVICE_URL}"
+  echo "Health check endpoint: ${SERVICE_URL}/api/health"
+fi

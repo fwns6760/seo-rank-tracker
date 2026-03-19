@@ -184,9 +184,10 @@ export function logJobError(
 export function createJobLogger(options: JobLoggerOptions) {
   const context = createJobLoggerContext(options);
   const startedAtMs = new Date(context.startedAt).getTime();
-  const defaultDurationMs = Number.isNaN(startedAtMs)
-    ? undefined
-    : Math.max(0, Date.now() - startedAtMs);
+  const resolveDurationMs = () =>
+    Number.isNaN(startedAtMs)
+      ? undefined
+      : Math.max(0, Date.now() - startedAtMs);
 
   return {
     context,
@@ -194,7 +195,7 @@ export function createJobLogger(options: JobLoggerOptions) {
     logExecution(input: JobExecutionLogInput) {
       return logJobExecution(context, {
         ...input,
-        durationMs: input.durationMs ?? defaultDurationMs,
+        durationMs: input.durationMs ?? resolveDurationMs(),
       });
     },
     logStep(input: JobStepLogInput) {

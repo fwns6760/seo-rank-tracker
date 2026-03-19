@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+required_vars=(
+  GOOGLE_CLOUD_PROJECT
+  CLOUD_RUN_REGION
+  CRAWL_INTERNAL_LINKS_JOB_NAME
+  CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION
+  CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME
+  CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT
+)
+
+for required_var in "${required_vars[@]}"; do
+  if [[ -z "${!required_var:-}" ]]; then
+    echo "Missing required environment variable: ${required_var}" >&2
+    exit 1
+  fi
+done
+
+CRAWL_INTERNAL_LINKS_SCHEDULE="${CRAWL_INTERNAL_LINKS_SCHEDULE:-30 6 * * *}"
+CRAWL_INTERNAL_LINKS_TIME_ZONE="${CRAWL_INTERNAL_LINKS_TIME_ZONE:-Asia/Tokyo}"
+CRAWL_INTERNAL_LINKS_ATTEMPT_DEADLINE="${CRAWL_INTERNAL_LINKS_ATTEMPT_DEADLINE:-300s}"
+CRAWL_INTERNAL_LINKS_MAX_RETRY_ATTEMPTS="${CRAWL_INTERNAL_LINKS_MAX_RETRY_ATTEMPTS:-0}"
+CRAWL_INTERNAL_LINKS_MAX_RETRY_DURATION="${CRAWL_INTERNAL_LINKS_MAX_RETRY_DURATION:-0s}"
+CRAWL_INTERNAL_LINKS_MIN_BACKOFF="${CRAWL_INTERNAL_LINKS_MIN_BACKOFF:-5s}"
+CRAWL_INTERNAL_LINKS_MAX_BACKOFF="${CRAWL_INTERNAL_LINKS_MAX_BACKOFF:-300s}"
+CRAWL_INTERNAL_LINKS_MAX_DOUBLINGS="${CRAWL_INTERNAL_LINKS_MAX_DOUBLINGS:-2}"
+CRAWL_INTERNAL_LINKS_MESSAGE_BODY="${CRAWL_INTERNAL_LINKS_MESSAGE_BODY:-{}}"
+CRAWL_INTERNAL_LINKS_DESCRIPTION="${CRAWL_INTERNAL_LINKS_DESCRIPTION:-Run crawl_internal_links once per day.}"
+CRAWL_INTERNAL_LINKS_OAUTH_SCOPE="${CRAWL_INTERNAL_LINKS_OAUTH_SCOPE:-https://www.googleapis.com/auth/cloud-platform}"
+
+RUN_JOB_URI="https://run.googleapis.com/v2/projects/${GOOGLE_CLOUD_PROJECT}/locations/${CLOUD_RUN_REGION}/jobs/${CRAWL_INTERNAL_LINKS_JOB_NAME}:run"
+
+common_args=(
+  --project="${GOOGLE_CLOUD_PROJECT}"
+  --location="${CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION}"
+  --schedule="${CRAWL_INTERNAL_LINKS_SCHEDULE}"
+  --time-zone="${CRAWL_INTERNAL_LINKS_TIME_ZONE}"
+  --uri="${RUN_JOB_URI}"
+  --http-method=POST
+  --attempt-deadline="${CRAWL_INTERNAL_LINKS_ATTEMPT_DEADLINE}"
+  --description="${CRAWL_INTERNAL_LINKS_DESCRIPTION}"
+  --oauth-service-account-email="${CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT}"
+  --oauth-token-scope="${CRAWL_INTERNAL_LINKS_OAUTH_SCOPE}"
+  --max-retry-attempts="${CRAWL_INTERNAL_LINKS_MAX_RETRY_ATTEMPTS}"
+  --max-retry-duration="${CRAWL_INTERNAL_LINKS_MAX_RETRY_DURATION}"
+  --min-backoff="${CRAWL_INTERNAL_LINKS_MIN_BACKOFF}"
+  --max-backoff="${CRAWL_INTERNAL_LINKS_MAX_BACKOFF}"
+  --max-doublings="${CRAWL_INTERNAL_LINKS_MAX_DOUBLINGS}"
+  --message-body="${CRAWL_INTERNAL_LINKS_MESSAGE_BODY}"
+)
+
+if gcloud scheduler jobs describe "${CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME}" \
+  --project="${GOOGLE_CLOUD_PROJECT}" \
+  --location="${CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION}" >/dev/null 2>&1; then
+  gcloud scheduler jobs update http "${CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME}" \
+    "${common_args[@]}" \
+    --update-headers="Content-Type=application/json"
+else
+  gcloud scheduler jobs create http "${CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME}" \
+    "${common_args[@]}" \
+    --headers="Content-Type=application/json"
+fi

@@ -36,6 +36,7 @@ export const sqlQueryNames = [
   "rewrite_before_after_comparison",
   "rewrite_history",
   "rewrite_opportunity_candidates",
+  "tracked_keyword_candidates",
   "tracked_keyword_list",
   "upsert_app_setting",
   "upsert_tracked_keyword",

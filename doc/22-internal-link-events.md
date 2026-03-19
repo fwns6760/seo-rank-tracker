@@ -34,3 +34,5 @@
 - 2026-03-16: `app/pages/page.tsx` を更新し、ページ単位の内部リンク施策登録フォーム、履歴一覧、`/links` への導線を追加。
 - 2026-03-16: `README.md`, `app/api/README.md`, `docs/decisions.md` を更新し、migration、API、運用ルールを反映。
 - 2026-03-16: `npm run typecheck`, `npm run lint`, `npm run build` を実行し、通過を確認。
+- 2026-03-17: `app/api/internal-link-events/route.ts` に `validate_input` / `insert_internal_link_event` の started/success step ログを追加し、validation 成否と BigQuery 反映を `execution_id` 単位で追跡しやすくした。
+- 2026-03-17: `app/api/internal-link-events/route.ts` の logger 初期化を env 検証より先に移し、環境変数不足でも失敗ログが残るよう補正した。JSON 構文エラーも validation error として `400` に寄せた。

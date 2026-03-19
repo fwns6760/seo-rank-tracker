@@ -5,6 +5,8 @@
 - Default to Server Components under `app/`.
 - Split interactive charts, forms, and browser-only logic into Client Components.
 - Keep direct data access out of route files and page files. Query logic belongs in `lib/`.
+- Root-level `app/error.tsx` and `app/global-error.tsx` should exist so operator-facing failures do not degrade into a blank screen.
+- Root-level `app/loading.tsx` should exist for operator-facing routes that depend on server-side data, so slow queries do not present as a blank screen.
 
 ## Directory ownership
 

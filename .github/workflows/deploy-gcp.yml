@@ -21,6 +21,16 @@ on:
         required: true
         type: boolean
         default: true
+      deploy_crawl_internal_links_job:
+        description: Deploy crawl_internal_links Cloud Run job
+        required: true
+        type: boolean
+        default: true
+      deploy_crawl_internal_links_scheduler:
+        description: Deploy crawl_internal_links Cloud Scheduler job
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
   group: deploy-gcp-production
@@ -60,6 +70,17 @@ jobs:
       CLOUD_SCHEDULER_LOCATION: ${{ vars.CLOUD_SCHEDULER_LOCATION }}
       CLOUD_SCHEDULER_JOB_NAME: ${{ vars.CLOUD_SCHEDULER_JOB_NAME }}
       CLOUD_SCHEDULER_SERVICE_ACCOUNT: ${{ vars.CLOUD_SCHEDULER_SERVICE_ACCOUNT }}
+      CRAWL_INTERNAL_LINKS_JOB_NAME: ${{ vars.CRAWL_INTERNAL_LINKS_JOB_NAME }}
+      CRAWL_INTERNAL_LINKS_JOB_SERVICE_ACCOUNT: ${{ vars.CRAWL_INTERNAL_LINKS_JOB_SERVICE_ACCOUNT }}
+      CRAWL_INTERNAL_LINKS_SECRET_MAPPINGS: ${{ vars.CRAWL_INTERNAL_LINKS_SECRET_MAPPINGS }}
+      CRAWL_INTERNAL_LINKS_IMAGE_TAG: ${{ vars.CRAWL_INTERNAL_LINKS_IMAGE_TAG }}
+      CRAWL_INTERNAL_LINKS_DEFAULT_ARGS: ${{ vars.CRAWL_INTERNAL_LINKS_DEFAULT_ARGS }}
+      CRAWL_INTERNAL_LINKS_START_URL: ${{ vars.CRAWL_INTERNAL_LINKS_START_URL }}
+      CRAWL_INTERNAL_LINKS_USER_AGENT: ${{ vars.CRAWL_INTERNAL_LINKS_USER_AGENT }}
+      CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION: ${{ vars.CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION }}
+      CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME: ${{ vars.CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME }}
+      CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT: ${{ vars.CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT }}
+      CRAWL_INTERNAL_LINKS_SCHEDULE: ${{ vars.CRAWL_INTERNAL_LINKS_SCHEDULE }}
 
     steps:
       - name: Checkout
@@ -88,3 +109,11 @@ jobs:
       - name: Deploy fetch_gsc Cloud Scheduler job
         if: (github.event_name != 'workflow_dispatch' || inputs.deploy_fetch_gsc_scheduler) && env.CLOUD_SCHEDULER_LOCATION != '' && env.CLOUD_SCHEDULER_JOB_NAME != '' && env.CLOUD_SCHEDULER_SERVICE_ACCOUNT != ''
         run: bash scripts/deploy-fetch-gsc-scheduler.sh
+
+      - name: Deploy crawl_internal_links Cloud Run job
+        if: (github.event_name != 'workflow_dispatch' || inputs.deploy_crawl_internal_links_job) && env.CRAWL_INTERNAL_LINKS_JOB_NAME != '' && env.CRAWL_INTERNAL_LINKS_JOB_SERVICE_ACCOUNT != ''
+        run: bash scripts/deploy-crawl-internal-links-job.sh
+
+      - name: Deploy crawl_internal_links Cloud Scheduler job
+        if: (github.event_name != 'workflow_dispatch' || inputs.deploy_crawl_internal_links_scheduler) && env.CRAWL_INTERNAL_LINKS_SCHEDULER_LOCATION != '' && env.CRAWL_INTERNAL_LINKS_SCHEDULER_JOB_NAME != '' && env.CRAWL_INTERNAL_LINKS_SCHEDULER_SERVICE_ACCOUNT != '' && env.CRAWL_INTERNAL_LINKS_JOB_NAME != ''
+        run: bash scripts/deploy-crawl-internal-links-scheduler.sh

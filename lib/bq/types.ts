@@ -351,6 +351,15 @@ export type TrackedKeywordRow = {
   updated_at: string;
 };
 
+export type TrackedKeywordCandidateRow = {
+  keyword: string;
+  target_url: string;
+  clicks: number | string | null;
+  impressions: number | string | null;
+  average_position: number | null;
+  latest_date: string | null;
+};
+
 export type AppSettingRow = {
   setting_key: string;
   setting_value: string | null;

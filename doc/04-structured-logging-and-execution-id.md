@@ -40,3 +40,4 @@
 - 2026-03-16: `lib/logging/` に `execution_id` 生成、structured logger、job logger、型定義、公開エントリポイントを追加。
 - 2026-03-16: `docs/logging-contract.md` を追加し、必須フィールド、ジョブ/ステップ/エラーログ契約、Slack での `execution_id` 利用前提を整理。
 - 2026-03-16: `npm run typecheck`, `npm run lint`, `npm run build` を実行し、通過を確認。
+- 2026-03-17: `createJobLogger` の既定 `duration_ms` が logger 作成時の固定値になっていたため、`logExecution` 呼び出し時点で都度再計算するよう補正した。

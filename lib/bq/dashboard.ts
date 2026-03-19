@@ -28,7 +28,7 @@ type DashboardWindowInput = DateRangeInput & {
 };
 
 function normalizeNullableFilter(value?: string | null) {
-  return value && value.length > 0 ? value : null;
+  return value && value.length > 0 ? value : "";
 }
 
 function getDefaultDateRange(windowDays = 30) {
@@ -45,6 +45,8 @@ export async function getDashboardKpiSummary(windowDays = 30) {
     {
       start_date: startDate,
       end_date: endDate,
+      keyword: "",
+      url: "",
     },
   );
 

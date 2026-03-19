@@ -44,3 +44,4 @@
 - 2026-03-16: `docs/cloud-run-jobs.md` を追加し、引数設計、Secret Manager 注入方針、最小設定、実行例、ログ仕様を整理。
 - 2026-03-16: 共通 launcher を local / Cloud Run 両方で使う判断を `docs/decisions.md` に記録。
 - 2026-03-16: `sh scripts/run-fetch-gsc.sh --help`, `bash -n scripts/deploy-fetch-gsc-job.sh`, `python3 -m compileall jobs/fetch_gsc`, `npm run build`, `npm run typecheck`, `npm run lint` を実行し、通過を確認。
+- 2026-03-19: `crawl_internal_links` についても `scripts/run-crawl-internal-links.sh`, `jobs/crawl_internal_links/Dockerfile`, `cloudbuild.crawl-internal-links.yaml`, `scripts/deploy-crawl-internal-links-job.sh` を追加し、`fetch_gsc` と同じ Cloud Run Job 導線へ載せた。

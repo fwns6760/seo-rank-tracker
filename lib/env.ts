@@ -8,6 +8,11 @@ const requiredServerEnvKeys = [
 
 type RequiredServerEnvKey = (typeof requiredServerEnvKeys)[number];
 
+type RequiredServerEnvEntry = {
+  key: RequiredServerEnvKey;
+  value: string;
+};
+
 export type ServerEnv = {
   googleCloudProject: string;
   bigQueryDataset: string;
@@ -34,7 +39,7 @@ function mapRequiredEnv(key: RequiredServerEnvKey) {
   return {
     key,
     value: readEnv(key),
-  };
+  } satisfies RequiredServerEnvEntry;
 }
 
 /**
@@ -83,4 +88,33 @@ export function getServerEnv(): ServerEnv {
  */
 export function getRequiredServerEnv() {
   return requiredServerEnvKeys.map(mapRequiredEnv);
+}
+
+/**
+ * Returns a non-throwing snapshot of runtime configuration health for operator UI.
+ */
+export function getRuntimeDiagnostics() {
+  const requiredEnv = getRequiredServerEnv();
+  const missingRequiredKeys = requiredEnv
+    .filter((entry) => entry.value.length === 0)
+    .map((entry) => entry.key);
+  const manualRunMode =
+    readEnv("MANUAL_RUN_MODE") === "cloud_run_job"
+      ? "cloud_run_job"
+      : "local_process";
+  const manualRunCloudRunRegion = readEnv("MANUAL_RUN_CLOUD_RUN_REGION");
+  const manualRunFetchGscJobName = readEnv("MANUAL_RUN_FETCH_GSC_JOB_NAME");
+
+  return {
+    requiredEnv,
+    missingRequiredKeys,
+    targetSiteHost: readEnv("TARGET_SITE_HOST") || null,
+    manualRunMode,
+    manualRunCloudRunRegion,
+    manualRunFetchGscJobName,
+    manualRunCloudRunReady:
+      manualRunMode !== "cloud_run_job" ||
+      (manualRunCloudRunRegion.length > 0 &&
+        manualRunFetchGscJobName.length > 0),
+  };
 }

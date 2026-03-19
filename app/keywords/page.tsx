@@ -502,7 +502,7 @@ export default async function KeywordsPage({ searchParams }: KeywordsPageProps) 
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={keyword ?? ""}
                 name="keyword"
-                placeholder="例: family travel"
+                placeholder="例: 大谷翔平 ホームラン"
                 type="text"
               />
             </label>
@@ -522,7 +522,7 @@ export default async function KeywordsPage({ searchParams }: KeywordsPageProps) 
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={pillarSearch ?? ""}
                 name="pillar"
-                placeholder="travel planning"
+                placeholder="MLB 分析"
                 type="text"
               />
             </label>
@@ -532,7 +532,7 @@ export default async function KeywordsPage({ searchParams }: KeywordsPageProps) 
                 className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none"
                 defaultValue={clusterSearch ?? ""}
                 name="cluster"
-                placeholder="packing checklist"
+                placeholder="ドジャース戦レビュー"
                 type="text"
               />
             </label>

@@ -9,11 +9,14 @@ import { createJobLogger } from "@/lib/logging";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getTargetSite() {
+  return process.env.TARGET_SITE_HOST?.trim() || "unknown";
+}
+
 export async function POST() {
-  const env = getServerEnv();
   const logger = createJobLogger({
     jobName: "dispatch_alerts",
-    targetSite: env.targetSiteHost,
+    targetSite: getTargetSite(),
   });
 
   logger.logExecution({
@@ -22,6 +25,7 @@ export async function POST() {
   });
 
   try {
+    getServerEnv();
     logger.logStep({
       step: "load_alert_feed",
       stepStatus: "started",

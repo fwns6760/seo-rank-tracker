@@ -40,3 +40,4 @@
 - 2026-03-16: `docs/cloud-scheduler-operations.md` を追加し、必要 API、Scheduler topology、実行時刻、再実行方針、Cloud Logging 追跡手順、将来アラート方針を整理。
 - 2026-03-16: Scheduler の既定時刻を `Asia/Tokyo` の毎日 `06:00`、Scheduler retry `0`、Cloud Run Job task retry `1` とする判断を `docs/decisions.md` に記録。
 - 2026-03-16: `gcloud scheduler jobs create http --help`, `gcloud scheduler jobs update http --help`, `gcloud logging read --help`, `bash -n scripts/deploy-fetch-gsc-scheduler.sh` を実行し、CLI flag と script 構文を確認。
+- 2026-03-19: `scripts/deploy-crawl-internal-links-scheduler.sh` を追加し、`crawl_internal_links` も Cloud Scheduler の HTTP job として create / update 管理できるようにした。既定時刻は `fetch_gsc` の後段となる `06:30 JST` とし、判断を `docs/decisions.md` に記録した。
