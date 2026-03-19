@@ -4,7 +4,10 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 PROJECT_ROOT=$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)
 
+. "${SCRIPT_DIR}/load-dotenv.sh"
+
 cd "${PROJECT_ROOT}"
+load_dotenv_file "${PROJECT_ROOT}/.env.local"
 
 if [ -n "${PYTHON_BIN:-}" ]; then
   PYTHON_CMD="${PYTHON_BIN}"

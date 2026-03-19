@@ -91,6 +91,12 @@ npm run lint
 
 ## ローカル実行
 
+前提:
+
+- `scripts/run-fetch-gsc.sh`, `scripts/run-crawl-internal-links.sh`, `scripts/run-sync-wordpress-posts.sh` は repo 直下の `.env.local` を自動で読み込みます。
+- `fetch_gsc` をローカルで動かす場合は、事前に `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/webmasters.readonly` を実行して ADC を作成してください。
+- `fetch_gsc` の実行アカウントには Search Console の `https://prosports.yoshilover.com/` property への `Full user` 以上の権限が必要です。権限がない場合は `HttpError 403` で 0 rows になります。
+
 画面:
 
 - `/dashboard`: KPI、推移、alert 一覧、手動実行、Slack 通知送信
